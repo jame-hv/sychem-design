@@ -743,8 +743,9 @@ a.card{cursor:pointer}
 .nav-toggle{display:none;align-items:center;justify-content:center;width:40px;height:40px;flex:none;border:1px solid var(--color-divider);border-radius:var(--radius-md);background:transparent;color:var(--color-text);cursor:pointer;margin-left:auto;transition:background-color .15s ease}
 .nav-toggle:hover{background:color-mix(in srgb, var(--color-text) 6%, transparent)}
 
-/* — mega menu (Sản phẩm) — */
-.nav-item.has-mega{position:relative}
+/* — mega menu (Sản phẩm) — full-bleed panel anchored to the header, not the
+   trigger link, so it spans the page width instead of floating off-center
+   under wherever "Sản phẩm" happens to sit in the nav. — */
 .nav-mega-trigger-wrap{display:flex;align-items:center}
 .nav-mega-trigger{display:inline-flex !important;align-items:center;gap:5px;padding:10px 10px 10px 12px !important;border-radius:var(--radius-md) 0 0 var(--radius-md) !important}
 .nav-caret{display:inline-block;transition:transform .2s ease;flex:none}
@@ -758,21 +759,21 @@ a.card{cursor:pointer}
 .nav-mega-trigger[aria-current="page"]{color:var(--color-accent);background:var(--color-accent-100) !important;font-weight:600}
 
 .mega-panel{
-  position:absolute;top:100%;left:50%;padding-top:12px;
-  width:min(760px,92vw);z-index:60;
+  position:absolute;top:100%;left:0;right:0;width:100%;z-index:60;
   opacity:0;visibility:hidden;pointer-events:none;
-  transform:translate(-50%,4px);
+  transform:translateY(4px);
   transition:opacity .16s ease,transform .16s ease,visibility .16s;
 }
 .mega-panel-inner{
-  background:var(--color-bg);border:1px solid var(--color-divider);
-  border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);padding:20px;
+  max-width:1280px;margin:0 auto;padding:24px 28px;
+  background:var(--color-bg);border-top:1px solid var(--color-divider);
+  box-shadow:var(--shadow-lg);
 }
 .nav-item.has-mega:focus-within .mega-panel,
 .nav-item.has-mega.open .mega-panel{
-  opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0);
+  opacity:1;visibility:visible;pointer-events:auto;transform:translateY(0);
 }
-.mega-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.mega-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
 .mega-link{display:flex;flex-direction:column;gap:6px;text-decoration:none;color:inherit;padding:8px;border-radius:var(--radius-md);transition:background-color .15s ease,transform .15s ease}
 .mega-link:hover{background:color-mix(in srgb, var(--color-text) 6%, transparent);transform:translateY(-2px)}
 .mega-link img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius-md);transition:transform .2s ease}
@@ -782,12 +783,36 @@ a.card{cursor:pointer}
 .mega-panel a.mega-viewall{display:block;margin-top:16px;padding-top:14px;border-top:1px solid var(--color-divider);font-family:var(--font-heading);font-weight:600;font-size:13px;color:var(--color-accent);text-decoration:none;transition:opacity .15s ease}
 .mega-panel a.mega-viewall:hover{opacity:.7;color:var(--color-accent)}
 
+/* — fix: a flex/grid item with `aspect-ratio` still lets a percentage-sized
+   img child's OWN intrinsic ratio act as an automatic minimum size, so a
+   portrait source photo (e.g. 1600x2400) can inflate the box past its
+   specified ratio. `overflow:hidden` resets the automatic minimum size to 0
+   per spec — applies everywhere aspect-ratio boxes wrap an image (site-wide,
+   including the original blueprint photo frames). — */
+[style*="aspect-ratio"]{overflow:hidden;min-height:0;min-width:0}
+
 /* — product package thumbnails (Products page) — */
 .pkg-box{overflow:hidden;position:relative}
 .pkg-box img{width:100%;height:100%;object-fit:cover;display:block}
 .cat-banner{position:relative;border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:21/8;margin-bottom:28px}
 .cat-banner img{width:100%;height:100%;object-fit:cover;display:block}
 .cat-banner-caption{position:absolute;left:0;right:0;bottom:0;padding:18px 24px;background:linear-gradient(0deg,rgba(2,11,24,.72),transparent);color:#fff;font-family:var(--font-heading);font-weight:600;font-size:15px}
+
+/* — "Vì sao chọn SYCHEM" bento grid: explicit grid-column/grid-row placement
+   needs an explicit mobile fallback, since the generic [style*=...] rules
+   below only rewrite grid-template-columns, not per-item placement. — */
+@media (max-width:900px){
+  .bento-grid{grid-template-columns:1fr 1fr !important;grid-auto-rows:auto !important}
+  .bento-lg{grid-column:1 / 3 !important;grid-row:auto !important;flex-direction:column !important}
+  .bento-lg-media{min-height:220px}
+  .bento-a{grid-column:1 !important;grid-row:auto !important}
+  .bento-b{grid-column:2 !important;grid-row:auto !important}
+  .bento-quote{grid-column:1 / 3 !important;grid-row:auto !important}
+}
+@media (max-width:640px){
+  .bento-grid{grid-template-columns:1fr !important}
+  .bento-lg,.bento-a,.bento-b,.bento-quote{grid-column:1 !important}
+}
 
 /* — buttons: give the outline/secondary style real surface contrast — */
 .btn-secondary{background:var(--color-bg-elevated,#fff);border-color:var(--color-divider);box-shadow:var(--shadow-sm)}
@@ -800,7 +825,6 @@ a.card{cursor:pointer}
 
 /* — responsive: tablet — */
 @media (max-width:1080px){
-  .mega-panel{width:min(560px,92vw)}
   .mega-grid{grid-template-columns:repeat(3,1fr)}
 }
 
@@ -841,16 +865,12 @@ a.card{cursor:pointer}
   .mega-grid{grid-template-columns:repeat(2,1fr)}
   .mega-link img{aspect-ratio:16/10}
 
-  .nav-scrim{
-    display:block;position:fixed;inset:0;background:rgba(2,11,24,.55);z-index:65;
-    opacity:0;visibility:hidden;pointer-events:none;
-    transition:opacity .28s ease,visibility .28s;
-    backdrop-filter:blur(1px);
-  }
-  .nav-scrim.open{opacity:1;visibility:visible;pointer-events:auto}
 }
 
 @media (max-width:640px){
   .mega-grid{grid-template-columns:1fr 1fr}
   .cat-banner{aspect-ratio:16/9}
+  /* keep the two hero CTAs on one row instead of stacking */
+  .hero-cta-row{flex-wrap:nowrap !important;gap:10px !important}
+  .hero-cta-btn{padding:11px 4px !important;font-size:13.5px !important;flex:1 1 0 !important;text-align:center;justify-content:center}
 }

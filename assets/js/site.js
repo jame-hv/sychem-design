@@ -5,34 +5,29 @@
   var links = document.getElementById("nav-links");
   if (!toggle || !links) return;
 
-  var scrim = document.createElement("div");
-  scrim.className = "nav-scrim";
-  document.body.appendChild(scrim);
-
-  function closeDrawer() {
+  function closeAll() {
     links.classList.remove("open");
-    scrim.classList.remove("open");
     toggle.setAttribute("aria-expanded", "false");
     document.querySelectorAll(".nav-item.has-mega.open").forEach(function (el) {
       el.classList.remove("open");
+    });
+    document.querySelectorAll(".mega-toggle").forEach(function (btn) {
+      btn.setAttribute("aria-expanded", "false");
     });
   }
 
   function openDrawer() {
     links.classList.add("open");
-    scrim.classList.add("open");
     toggle.setAttribute("aria-expanded", "true");
   }
 
   toggle.addEventListener("click", function () {
-    if (links.classList.contains("open")) closeDrawer();
+    if (links.classList.contains("open")) closeAll();
     else openDrawer();
   });
 
-  scrim.addEventListener("click", closeDrawer);
-
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeDrawer();
+    if (e.key === "Escape") closeAll();
   });
 
   document.querySelectorAll(".mega-toggle").forEach(function (btn) {
@@ -70,13 +65,19 @@
 
   links.querySelectorAll("a").forEach(function (a) {
     a.addEventListener("click", function () {
-      if (window.matchMedia("(max-width: 900px)").matches) closeDrawer();
+      if (!isDesktop()) closeAll();
     });
   });
 
-  window.addEventListener("resize", function () {
-    if (window.innerWidth > 900) closeDrawer();
-  });
+  // Reset drawer/mega state whenever the layout crosses the mobile<->desktop
+  // breakpoint (e.g. a mega menu left open by hover, then the window is
+  // resized down before the mouse ever leaves it) so nothing gets stuck.
+  var breakpoint = window.matchMedia("(max-width: 900px)");
+  var onBreakpointChange = function () {
+    closeAll();
+  };
+  if (breakpoint.addEventListener) breakpoint.addEventListener("change", onBreakpointChange);
+  else if (breakpoint.addListener) breakpoint.addListener(onBreakpointChange);
 
   var contactForm = document.getElementById("contact-form");
   if (contactForm) {
